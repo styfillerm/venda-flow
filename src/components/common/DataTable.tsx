@@ -14,7 +14,7 @@ export interface Column<T> {
   render?: (row: T) => ReactNode;
 }
 
-interface Props<T extends Record<string, unknown>> {
+interface Props<T> {
   data: T[];
   columns: Column<T>[];
   searchKeys?: (keyof T)[];
@@ -25,10 +25,10 @@ interface Props<T extends Record<string, unknown>> {
   initialSort?: { key: keyof T; dir: SortDir };
 }
 
-export function DataTable<T extends Record<string, unknown>>({
+export function DataTable<T>({
   data, columns, searchKeys, searchPlaceholder = "Pesquisar...", pageSize = 8, actions, emptyMessage = "Nenhum registro encontrado.", initialSort,
 }: Props<T>) {
-  const t = useDataTable(data, { searchKeys, pageSize, initialSort });
+  const t = useDataTable(data as any, { searchKeys: searchKeys as any, pageSize, initialSort: initialSort as any });
 
   return (
     <div className="space-y-3">
