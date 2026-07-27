@@ -27,7 +27,7 @@ const schema = z.object({
   produtoId: z.string().min(1, "Selecione um produto"),
   quantidade: z.coerce.number().min(1, "Mínimo 1"),
   valorUnitario: z.coerce.number().min(0),
-  desconto: z.coerce.number().min(0).default(0),
+  desconto: z.coerce.number().min(0),
   formaPagamento: z.enum(["dinheiro", "pix", "cartao_credito", "cartao_debito", "boleto"]),
   data: z.string().min(1),
 });

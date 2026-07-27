@@ -27,8 +27,8 @@ const schema = z.object({
   telefone: z.string().min(3, "Informe o telefone"),
   email: z.string().email("Email inválido"),
   cidade: z.string().min(1, "Informe a cidade"),
-  endereco: z.string().default(""),
-  observacoes: z.string().default(""),
+  endereco: z.string(),
+  observacoes: z.string(),
 });
 type Form = z.infer<typeof schema>;
 
