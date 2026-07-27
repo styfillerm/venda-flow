@@ -28,7 +28,8 @@ interface Props<T> {
 export function DataTable<T>({
   data, columns, searchKeys, searchPlaceholder = "Pesquisar...", pageSize = 8, actions, emptyMessage = "Nenhum registro encontrado.", initialSort,
 }: Props<T>) {
-  const t = useDataTable(data as any, { searchKeys: searchKeys as any, pageSize, initialSort: initialSort as any });
+  const t = useDataTable<any>(data as any[], { searchKeys: searchKeys as any, pageSize, initialSort: initialSort as any });
+  const rows = t.rows as T[];
 
   return (
     <div className="space-y-3">
