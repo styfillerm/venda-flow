@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 export type SortDir = "asc" | "desc";
 
-export function useDataTable<T extends Record<string, unknown>>(
+export function useDataTable<T>(
   data: T[],
   opts: { searchKeys?: (keyof T)[]; pageSize?: number; initialSort?: { key: keyof T; dir: SortDir } } = {},
 ) {
@@ -17,13 +17,13 @@ export function useDataTable<T extends Record<string, unknown>>(
     if (search && searchKeys.length) {
       const q = search.toLowerCase();
       out = out.filter((row) =>
-        searchKeys.some((k) => String(row[k] ?? "").toLowerCase().includes(q)),
+        searchKeys.some((k) => String((row as any)[k] ?? "").toLowerCase().includes(q)),
       );
     }
     if (sortKey) {
       out = [...out].sort((a, b) => {
-        const av = a[sortKey];
-        const bv = b[sortKey];
+        const av = (a as any)[sortKey];
+        const bv = (b as any)[sortKey];
         if (av == null) return 1;
         if (bv == null) return -1;
         if (typeof av === "number" && typeof bv === "number")
