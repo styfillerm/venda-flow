@@ -1,5 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { AuthProvider } from "@/context/AuthContext";
+import { createFileRoute } from "@tanstack/react-router";
 import { DataProvider } from "@/context/DataContext";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 
@@ -9,10 +8,8 @@ export const Route = createFileRoute("/_app")({
 
 function AppLayout() {
   return (
-    <AuthProvider>
-      <DataProvider>
-        <DashboardLayout />
-      </DataProvider>
-    </AuthProvider>
+    <DataProvider>
+      <DashboardLayout />
+    </DataProvider>
   );
 }
