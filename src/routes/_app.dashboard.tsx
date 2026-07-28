@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_app/dashboard")({
   component: DashboardPage,
 });
 
-const CHART_COLORS = ["#2563eb", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
+const CHART_COLORS = ["#7c3aed", "#f59e0b", "#a855f7", "#eab308", "#c084fc", "#fbbf24", "#9333ea"];
 
 function DashboardPage() {
   const { sales, products, clients, suppliers, expenses } = useData();
