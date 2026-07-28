@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_app/dashboard")({
   component: DashboardPage,
 });
 
-const CHART_COLORS = ["#2563eb", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
+const CHART_COLORS = ["#7c3aed", "#f59e0b", "#a855f7", "#eab308", "#c084fc", "#fbbf24", "#9333ea"];
 
 function DashboardPage() {
   const { sales, products, clients, suppliers, expenses } = useData();
@@ -109,8 +109,9 @@ function DashboardPage() {
                 <YAxis fontSize={12} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v: number) => brl(v)} />
                 <Legend />
-                <Line type="monotone" dataKey="receita" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 3 }} name="Receita" />
-                <Line type="monotone" dataKey="lucro" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} name="Lucro" />
+                <Line type="monotone" dataKey="receita" stroke="#7c3aed" strokeWidth={2.5} dot={{ r: 3 }} name="Receita" />
+                <Line type="monotone" dataKey="lucro" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3 }} name="Lucro" />
+
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -140,7 +141,7 @@ function DashboardPage() {
                 <XAxis dataKey="label" fontSize={12} />
                 <YAxis fontSize={12} />
                 <Tooltip />
-                <Bar dataKey="vendas" fill="#2563eb" radius={[8, 8, 0, 0]} name="Vendas" />
+                <Bar dataKey="vendas" fill="#7c3aed" radius={[8, 8, 0, 0]} name="Vendas" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -155,7 +156,7 @@ function DashboardPage() {
                 <XAxis type="number" fontSize={12} />
                 <YAxis type="category" dataKey="nome" fontSize={11} width={110} />
                 <Tooltip />
-                <Bar dataKey="qty" fill="#10b981" radius={[0, 8, 8, 0]} name="Unidades" />
+                <Bar dataKey="qty" fill="#f59e0b" radius={[0, 8, 8, 0]} name="Unidades" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -170,7 +171,7 @@ function DashboardPage() {
                 <XAxis dataKey="name" fontSize={12} />
                 <YAxis fontSize={12} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v: number) => brl(v)} />
-                <Bar dataKey="value" fill="#0ea5e9" radius={[8, 8, 0, 0]} name="Receita" />
+                <Bar dataKey="value" fill="#a855f7" radius={[8, 8, 0, 0]} name="Receita" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
