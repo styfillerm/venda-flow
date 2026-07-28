@@ -141,7 +141,7 @@ function DashboardPage() {
                 <XAxis dataKey="label" fontSize={12} />
                 <YAxis fontSize={12} />
                 <Tooltip />
-                <Bar dataKey="vendas" fill="#2563eb" radius={[8, 8, 0, 0]} name="Vendas" />
+                <Bar dataKey="vendas" fill="#7c3aed" radius={[8, 8, 0, 0]} name="Vendas" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
