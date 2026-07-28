@@ -109,8 +109,9 @@ function DashboardPage() {
                 <YAxis fontSize={12} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v: number) => brl(v)} />
                 <Legend />
-                <Line type="monotone" dataKey="receita" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 3 }} name="Receita" />
-                <Line type="monotone" dataKey="lucro" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} name="Lucro" />
+                <Line type="monotone" dataKey="receita" stroke="#7c3aed" strokeWidth={2.5} dot={{ r: 3 }} name="Receita" />
+                <Line type="monotone" dataKey="lucro" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3 }} name="Lucro" />
+
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
