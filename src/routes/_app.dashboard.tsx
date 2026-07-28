@@ -156,7 +156,7 @@ function DashboardPage() {
                 <XAxis type="number" fontSize={12} />
                 <YAxis type="category" dataKey="nome" fontSize={11} width={110} />
                 <Tooltip />
-                <Bar dataKey="qty" fill="#10b981" radius={[0, 8, 8, 0]} name="Unidades" />
+                <Bar dataKey="qty" fill="#f59e0b" radius={[0, 8, 8, 0]} name="Unidades" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
