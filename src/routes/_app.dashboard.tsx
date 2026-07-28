@@ -171,7 +171,7 @@ function DashboardPage() {
                 <XAxis dataKey="name" fontSize={12} />
                 <YAxis fontSize={12} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v: number) => brl(v)} />
-                <Bar dataKey="value" fill="#0ea5e9" radius={[8, 8, 0, 0]} name="Receita" />
+                <Bar dataKey="value" fill="#a855f7" radius={[8, 8, 0, 0]} name="Receita" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
