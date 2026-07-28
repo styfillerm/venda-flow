@@ -6,7 +6,7 @@ const KEYS = {
   products: "sgv_products",
   sales: "sgv_sales",
   expenses: "sgv_expenses",
-  seeded: "sgv_seeded_v1",
+  seeded: "sgv_seeded_v2",
 } as const;
 
 export const uid = () =>
