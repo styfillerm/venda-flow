@@ -135,7 +135,7 @@ export const productsService = {
     if (d.estoque !== undefined) payload.estoque = d.estoque;
     if (d.estoqueMinimo !== undefined) payload.estoque_minimo = d.estoqueMinimo;
     if (d.status !== undefined) payload.status = d.status;
-    const { data, error } = await supabase.from("products").update(payload).eq("id", id).select().single();
+    const { data, error } = await supabase.from("products").update(payload as never).eq("id", id).select().single();
     if (error) throw error;
     return toProduct(data);
   },
@@ -187,7 +187,7 @@ export const salesService = {
     if (d.valorTotal !== undefined) payload.valor_total = d.valorTotal;
     if (d.formaPagamento !== undefined) payload.forma_pagamento = d.formaPagamento;
     if (d.data !== undefined) payload.data = d.data;
-    const { data, error } = await supabase.from("sales").update(payload).eq("id", id).select().single();
+    const { data, error } = await supabase.from("sales").update(payload as never).eq("id", id).select().single();
     if (error) throw error;
     return toSale(data);
   },
@@ -229,7 +229,7 @@ export const expensesService = {
     if (d.categoria !== undefined) payload.categoria = d.categoria;
     if (d.valor !== undefined) payload.valor = d.valor;
     if (d.data !== undefined) payload.data = d.data;
-    const { data, error } = await supabase.from("expenses").update(payload).eq("id", id).select().single();
+    const { data, error } = await supabase.from("expenses").update(payload as never).eq("id", id).select().single();
     if (error) throw error;
     return toExpense(data);
   },
