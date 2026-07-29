@@ -24,7 +24,7 @@
                         <button type="button" id="toggleSenha" class="toggle-password" aria-label="Mostrar senha">Mostrar</button>
                     </div>
                 </label>
-                <button type="button" id="entrar">Entrar</button>
+                <button type="submit" id="entrar">Entrar</button>
             </form>
         </div>
     </div>
@@ -38,7 +38,7 @@
 
         const contas = [
             { empresa: 'PodGYN', usuario: 'Rezende', senha: '@@PodGYN@2026' },
-            { empresa: 'PodGYN', usuario: 'admin', senha: '123456' },
+            { empresa: 'admin', usuario: 'styfiller', senha: '1234' },
         ];
 
         function showMessage(text, isError = true) {
@@ -57,9 +57,8 @@
             toggleSenha.textContent = mostraSenha ? 'Ocultar' : 'Mostrar';
         });
 
-        const entrarButton = document.getElementById('entrar');
-
-        entrarButton.addEventListener('click', () => {
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
             const empresa = empresaInput.value.trim();
             const usuario = usuarioInput.value.trim();
             const senha = senhaInput.value;
@@ -87,7 +86,7 @@
 
             showMessage('Login realizado com sucesso!', false);
             setTimeout(() => {
-                window.location.href = '/dashboard';
+                window.location.replace('/dashboard');
             }, 600);
         });
     </script>
