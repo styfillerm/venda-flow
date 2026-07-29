@@ -125,7 +125,7 @@ export const productsService = {
     return toProduct(data);
   },
   update: async (id: string, d: Partial<Product>): Promise<Product> => {
-    const payload: Record<string, unknown> = {};
+    const payload: Record<string, any> = {};
     if (d.nome !== undefined) payload.nome = d.nome;
     if (d.codigo !== undefined) payload.codigo = d.codigo;
     if (d.categoria !== undefined) payload.categoria = d.categoria;
@@ -178,7 +178,7 @@ export const salesService = {
     return toSale(data);
   },
   update: async (id: string, d: Partial<Sale>): Promise<Sale> => {
-    const payload: Record<string, unknown> = {};
+    const payload: Record<string, any> = {};
     if (d.clienteId !== undefined) payload.cliente_id = d.clienteId || null;
     if (d.produtoId !== undefined) payload.produto_id = d.produtoId || null;
     if (d.quantidade !== undefined) payload.quantidade = d.quantidade;
@@ -224,7 +224,7 @@ export const expensesService = {
     return toExpense(data);
   },
   update: async (id: string, d: Partial<Expense>): Promise<Expense> => {
-    const payload: Record<string, unknown> = {};
+    const payload: Record<string, any> = {};
     if (d.descricao !== undefined) payload.descricao = d.descricao;
     if (d.categoria !== undefined) payload.categoria = d.categoria;
     if (d.valor !== undefined) payload.valor = d.valor;
