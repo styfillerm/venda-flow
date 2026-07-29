@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { clientsService, expensesService, productsService, salesService, suppliersService } from "@/services";
-import { seedIfEmpty } from "@/lib/mock-store";
+import { useAuth } from "@/context/AuthContext";
 import type { Client, Expense, Product, Sale, Supplier } from "@/types";
 
 interface DataCtx {
@@ -12,27 +12,22 @@ interface DataCtx {
   loading: boolean;
   refresh: () => Promise<void>;
 
-  // clients
   addClient: (d: Omit<Client, "id" | "createdAt">) => Promise<void>;
   updateClient: (id: string, d: Partial<Client>) => Promise<void>;
   removeClient: (id: string) => Promise<void>;
 
-  // suppliers
   addSupplier: (d: Omit<Supplier, "id" | "createdAt">) => Promise<void>;
   updateSupplier: (id: string, d: Partial<Supplier>) => Promise<void>;
   removeSupplier: (id: string) => Promise<void>;
 
-  // products
   addProduct: (d: Omit<Product, "id" | "createdAt">) => Promise<void>;
   updateProduct: (id: string, d: Partial<Product>) => Promise<void>;
   removeProduct: (id: string) => Promise<void>;
 
-  // sales
   addSale: (d: Omit<Sale, "id" | "createdAt">) => Promise<void>;
   updateSale: (id: string, d: Partial<Sale>) => Promise<void>;
   removeSale: (id: string) => Promise<void>;
 
-  // expenses
   addExpense: (d: Omit<Expense, "id" | "createdAt">) => Promise<void>;
   updateExpense: (id: string, d: Partial<Expense>) => Promise<void>;
   removeExpense: (id: string) => Promise<void>;
@@ -41,6 +36,7 @@ interface DataCtx {
 const Ctx = createContext<DataCtx | null>(null);
 
 export function DataProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -49,6 +45,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
+    if (!user) {
+      setClients([]); setSuppliers([]); setProducts([]); setSales([]); setExpenses([]);
+      return;
+    }
     const [c, s, p, sa, e] = await Promise.all([
       clientsService.list(),
       suppliersService.list(),
@@ -61,10 +61,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setProducts(p);
     setSales(sa);
     setExpenses(e);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    seedIfEmpty();
+    setLoading(true);
     refresh().finally(() => setLoading(false));
   }, [refresh]);
 
@@ -91,7 +91,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 }
 
 export function useData() {
-  const c = useContext(Ctx);
-  if (!c) throw new Error("useData must be used inside DataProvider");
-  return c;
+  const ctx = useContext(Ctx);
+  if (!ctx) throw new Error("useData must be used within DataProvider");
+  return ctx;
 }

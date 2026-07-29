@@ -1,127 +1,241 @@
 /**
- * Service layer — currently uses an in-memory/localStorage mock store.
- * To integrate a real backend (Node.js + Express + PostgreSQL) later,
- * replace each function body with the equivalent `api.get/post/put/delete` call.
- *
- * Example future replacement:
- *   list: async () => (await api.get<Client[]>("/clients")).data,
+ * Service layer — Lovable Cloud (Supabase) backed.
+ * Each service maps snake_case columns to camelCase types.
  */
-import { store, uid } from "@/lib/mock-store";
-import type { Client, Expense, Product, Sale, Supplier } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+import type { Client, Expense, PaymentMethod, Product, Sale, Supplier } from "@/types";
 
-// tiny delay to emulate async
-const delay = <T>(v: T, ms = 120) => new Promise<T>((r) => setTimeout(() => r(v), ms));
+async function currentUserId(): Promise<string> {
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) throw new Error("Não autenticado");
+  return data.user.id;
+}
+
+// ============ CLIENTS ============
+type ClientRow = {
+  id: string; nome: string; documento: string; telefone: string;
+  email: string; cidade: string; endereco: string; observacoes: string;
+  created_at: string;
+};
+const toClient = (r: ClientRow): Client => ({
+  id: r.id, nome: r.nome, documento: r.documento, telefone: r.telefone,
+  email: r.email, cidade: r.cidade, endereco: r.endereco,
+  observacoes: r.observacoes, createdAt: r.created_at,
+});
 
 export const clientsService = {
-  list: () => delay(store.clients.all()),
-  create: (data: Omit<Client, "id" | "createdAt">) => {
-    const all = store.clients.all();
-    const c: Client = { ...data, id: uid(), createdAt: new Date().toISOString() };
-    store.clients.save([c, ...all]);
-    return delay(c);
+  list: async (): Promise<Client[]> => {
+    const { data, error } = await supabase.from("clients").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map(toClient);
   },
-  update: (id: string, data: Partial<Client>) => {
-    const all = store.clients.all().map((c) => (c.id === id ? { ...c, ...data } : c));
-    store.clients.save(all);
-    return delay(all.find((c) => c.id === id)!);
+  create: async (d: Omit<Client, "id" | "createdAt">): Promise<Client> => {
+    const user_id = await currentUserId();
+    const { data, error } = await supabase.from("clients").insert({
+      user_id, nome: d.nome, documento: d.documento, telefone: d.telefone,
+      email: d.email, cidade: d.cidade, endereco: d.endereco, observacoes: d.observacoes,
+    }).select().single();
+    if (error) throw error;
+    return toClient(data);
   },
-  remove: (id: string) => {
-    store.clients.save(store.clients.all().filter((c) => c.id !== id));
-    return delay(true);
+  update: async (id: string, d: Partial<Client>): Promise<Client> => {
+    const { data, error } = await supabase.from("clients").update({
+      nome: d.nome, documento: d.documento, telefone: d.telefone,
+      email: d.email, cidade: d.cidade, endereco: d.endereco, observacoes: d.observacoes,
+    }).eq("id", id).select().single();
+    if (error) throw error;
+    return toClient(data);
+  },
+  remove: async (id: string) => {
+    const { error } = await supabase.from("clients").delete().eq("id", id);
+    if (error) throw error;
+    return true;
   },
 };
+
+// ============ SUPPLIERS ============
+type SupplierRow = {
+  id: string; empresa: string; cnpj: string; responsavel: string;
+  telefone: string; email: string; endereco: string; created_at: string;
+};
+const toSupplier = (r: SupplierRow): Supplier => ({
+  id: r.id, empresa: r.empresa, cnpj: r.cnpj, responsavel: r.responsavel,
+  telefone: r.telefone, email: r.email, endereco: r.endereco, createdAt: r.created_at,
+});
 
 export const suppliersService = {
-  list: () => delay(store.suppliers.all()),
-  create: (data: Omit<Supplier, "id" | "createdAt">) => {
-    const s: Supplier = { ...data, id: uid(), createdAt: new Date().toISOString() };
-    store.suppliers.save([s, ...store.suppliers.all()]);
-    return delay(s);
+  list: async (): Promise<Supplier[]> => {
+    const { data, error } = await supabase.from("suppliers").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map(toSupplier);
   },
-  update: (id: string, data: Partial<Supplier>) => {
-    const all = store.suppliers.all().map((s) => (s.id === id ? { ...s, ...data } : s));
-    store.suppliers.save(all);
-    return delay(all.find((s) => s.id === id)!);
+  create: async (d: Omit<Supplier, "id" | "createdAt">): Promise<Supplier> => {
+    const user_id = await currentUserId();
+    const { data, error } = await supabase.from("suppliers").insert({
+      user_id, empresa: d.empresa, cnpj: d.cnpj, responsavel: d.responsavel,
+      telefone: d.telefone, email: d.email, endereco: d.endereco,
+    }).select().single();
+    if (error) throw error;
+    return toSupplier(data);
   },
-  remove: (id: string) => {
-    store.suppliers.save(store.suppliers.all().filter((s) => s.id !== id));
-    return delay(true);
+  update: async (id: string, d: Partial<Supplier>): Promise<Supplier> => {
+    const { data, error } = await supabase.from("suppliers").update({
+      empresa: d.empresa, cnpj: d.cnpj, responsavel: d.responsavel,
+      telefone: d.telefone, email: d.email, endereco: d.endereco,
+    }).eq("id", id).select().single();
+    if (error) throw error;
+    return toSupplier(data);
+  },
+  remove: async (id: string) => {
+    const { error } = await supabase.from("suppliers").delete().eq("id", id);
+    if (error) throw error;
+    return true;
   },
 };
+
+// ============ PRODUCTS ============
+type ProductRow = {
+  id: string; nome: string; codigo: string; categoria: string;
+  fornecedor_id: string | null; valor_compra: number; valor_venda: number;
+  estoque: number; estoque_minimo: number; status: string; created_at: string;
+};
+const toProduct = (r: ProductRow): Product => ({
+  id: r.id, nome: r.nome, codigo: r.codigo, categoria: r.categoria,
+  fornecedorId: r.fornecedor_id ?? "", valorCompra: Number(r.valor_compra),
+  valorVenda: Number(r.valor_venda), estoque: r.estoque,
+  estoqueMinimo: r.estoque_minimo, status: (r.status as "ativo" | "inativo"),
+  createdAt: r.created_at,
+});
 
 export const productsService = {
-  list: () => delay(store.products.all()),
-  create: (data: Omit<Product, "id" | "createdAt">) => {
-    const p: Product = { ...data, id: uid(), createdAt: new Date().toISOString() };
-    store.products.save([p, ...store.products.all()]);
-    return delay(p);
+  list: async (): Promise<Product[]> => {
+    const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map(toProduct);
   },
-  update: (id: string, data: Partial<Product>) => {
-    const all = store.products.all().map((p) => (p.id === id ? { ...p, ...data } : p));
-    store.products.save(all);
-    return delay(all.find((p) => p.id === id)!);
+  create: async (d: Omit<Product, "id" | "createdAt">): Promise<Product> => {
+    const user_id = await currentUserId();
+    const { data, error } = await supabase.from("products").insert({
+      user_id, nome: d.nome, codigo: d.codigo, categoria: d.categoria,
+      fornecedor_id: d.fornecedorId || null,
+      valor_compra: d.valorCompra, valor_venda: d.valorVenda,
+      estoque: d.estoque, estoque_minimo: d.estoqueMinimo, status: d.status,
+    }).select().single();
+    if (error) throw error;
+    return toProduct(data);
   },
-  remove: (id: string) => {
-    store.products.save(store.products.all().filter((p) => p.id !== id));
-    return delay(true);
+  update: async (id: string, d: Partial<Product>): Promise<Product> => {
+    const payload: Record<string, any> = {};
+    if (d.nome !== undefined) payload.nome = d.nome;
+    if (d.codigo !== undefined) payload.codigo = d.codigo;
+    if (d.categoria !== undefined) payload.categoria = d.categoria;
+    if (d.fornecedorId !== undefined) payload.fornecedor_id = d.fornecedorId || null;
+    if (d.valorCompra !== undefined) payload.valor_compra = d.valorCompra;
+    if (d.valorVenda !== undefined) payload.valor_venda = d.valorVenda;
+    if (d.estoque !== undefined) payload.estoque = d.estoque;
+    if (d.estoqueMinimo !== undefined) payload.estoque_minimo = d.estoqueMinimo;
+    if (d.status !== undefined) payload.status = d.status;
+    const { data, error } = await supabase.from("products").update(payload as never).eq("id", id).select().single();
+    if (error) throw error;
+    return toProduct(data);
   },
-  decrementStock: (id: string, qty: number) => {
-    const all = store.products.all().map((p) =>
-      p.id === id ? { ...p, estoque: Math.max(0, p.estoque - qty) } : p,
-    );
-    store.products.save(all);
-  },
-  incrementStock: (id: string, qty: number) => {
-    const all = store.products.all().map((p) =>
-      p.id === id ? { ...p, estoque: p.estoque + qty } : p,
-    );
-    store.products.save(all);
+  remove: async (id: string) => {
+    const { error } = await supabase.from("products").delete().eq("id", id);
+    if (error) throw error;
+    return true;
   },
 };
+
+// ============ SALES ============
+type SaleRow = {
+  id: string; cliente_id: string | null; produto_id: string | null;
+  quantidade: number; valor_unitario: number; desconto: number;
+  valor_total: number; forma_pagamento: string; data: string; created_at: string;
+};
+const toSale = (r: SaleRow): Sale => ({
+  id: r.id, clienteId: r.cliente_id ?? "", produtoId: r.produto_id ?? "",
+  quantidade: r.quantidade, valorUnitario: Number(r.valor_unitario),
+  desconto: Number(r.desconto), valorTotal: Number(r.valor_total),
+  formaPagamento: r.forma_pagamento as PaymentMethod, data: r.data,
+  createdAt: r.created_at,
+});
 
 export const salesService = {
-  list: () => delay(store.sales.all()),
-  create: (data: Omit<Sale, "id" | "createdAt">) => {
-    const s: Sale = { ...data, id: uid(), createdAt: new Date().toISOString() };
-    store.sales.save([s, ...store.sales.all()]);
-    // side-effect: decrement stock
-    productsService.decrementStock(s.produtoId, s.quantidade);
-    return delay(s);
+  list: async (): Promise<Sale[]> => {
+    const { data, error } = await supabase.from("sales").select("*").order("data", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map(toSale);
   },
-  update: (id: string, data: Partial<Sale>) => {
-    const prev = store.sales.all().find((s) => s.id === id);
-    const all = store.sales.all().map((s) => (s.id === id ? { ...s, ...data } : s));
-    store.sales.save(all);
-    // adjust stock if quantity or product changed
-    if (prev && data.quantidade !== undefined && data.quantidade !== prev.quantidade) {
-      const diff = data.quantidade - prev.quantidade;
-      if (diff > 0) productsService.decrementStock(prev.produtoId, diff);
-      else productsService.incrementStock(prev.produtoId, -diff);
-    }
-    return delay(all.find((s) => s.id === id)!);
+  create: async (d: Omit<Sale, "id" | "createdAt">): Promise<Sale> => {
+    const user_id = await currentUserId();
+    const { data, error } = await supabase.from("sales").insert({
+      user_id, cliente_id: d.clienteId || null, produto_id: d.produtoId || null,
+      quantidade: d.quantidade, valor_unitario: d.valorUnitario,
+      desconto: d.desconto, valor_total: d.valorTotal,
+      forma_pagamento: d.formaPagamento, data: d.data,
+    }).select().single();
+    if (error) throw error;
+    return toSale(data);
   },
-  remove: (id: string) => {
-    const s = store.sales.all().find((x) => x.id === id);
-    if (s) productsService.incrementStock(s.produtoId, s.quantidade);
-    store.sales.save(store.sales.all().filter((x) => x.id !== id));
-    return delay(true);
+  update: async (id: string, d: Partial<Sale>): Promise<Sale> => {
+    const payload: Record<string, any> = {};
+    if (d.clienteId !== undefined) payload.cliente_id = d.clienteId || null;
+    if (d.produtoId !== undefined) payload.produto_id = d.produtoId || null;
+    if (d.quantidade !== undefined) payload.quantidade = d.quantidade;
+    if (d.valorUnitario !== undefined) payload.valor_unitario = d.valorUnitario;
+    if (d.desconto !== undefined) payload.desconto = d.desconto;
+    if (d.valorTotal !== undefined) payload.valor_total = d.valorTotal;
+    if (d.formaPagamento !== undefined) payload.forma_pagamento = d.formaPagamento;
+    if (d.data !== undefined) payload.data = d.data;
+    const { data, error } = await supabase.from("sales").update(payload as never).eq("id", id).select().single();
+    if (error) throw error;
+    return toSale(data);
+  },
+  remove: async (id: string) => {
+    const { error } = await supabase.from("sales").delete().eq("id", id);
+    if (error) throw error;
+    return true;
   },
 };
 
+// ============ EXPENSES ============
+type ExpenseRow = {
+  id: string; descricao: string; categoria: string;
+  valor: number; data: string; created_at: string;
+};
+const toExpense = (r: ExpenseRow): Expense => ({
+  id: r.id, descricao: r.descricao, categoria: r.categoria,
+  valor: Number(r.valor), data: r.data, createdAt: r.created_at,
+});
+
 export const expensesService = {
-  list: () => delay(store.expenses.all()),
-  create: (data: Omit<Expense, "id" | "createdAt">) => {
-    const e: Expense = { ...data, id: uid(), createdAt: new Date().toISOString() };
-    store.expenses.save([e, ...store.expenses.all()]);
-    return delay(e);
+  list: async (): Promise<Expense[]> => {
+    const { data, error } = await supabase.from("expenses").select("*").order("data", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map(toExpense);
   },
-  update: (id: string, data: Partial<Expense>) => {
-    const all = store.expenses.all().map((e) => (e.id === id ? { ...e, ...data } : e));
-    store.expenses.save(all);
-    return delay(all.find((e) => e.id === id)!);
+  create: async (d: Omit<Expense, "id" | "createdAt">): Promise<Expense> => {
+    const user_id = await currentUserId();
+    const { data, error } = await supabase.from("expenses").insert({
+      user_id, descricao: d.descricao, categoria: d.categoria,
+      valor: d.valor, data: d.data,
+    }).select().single();
+    if (error) throw error;
+    return toExpense(data);
   },
-  remove: (id: string) => {
-    store.expenses.save(store.expenses.all().filter((e) => e.id !== id));
-    return delay(true);
+  update: async (id: string, d: Partial<Expense>): Promise<Expense> => {
+    const payload: Record<string, any> = {};
+    if (d.descricao !== undefined) payload.descricao = d.descricao;
+    if (d.categoria !== undefined) payload.categoria = d.categoria;
+    if (d.valor !== undefined) payload.valor = d.valor;
+    if (d.data !== undefined) payload.data = d.data;
+    const { data, error } = await supabase.from("expenses").update(payload as never).eq("id", id).select().single();
+    if (error) throw error;
+    return toExpense(data);
+  },
+  remove: async (id: string) => {
+    const { error } = await supabase.from("expenses").delete().eq("id", id);
+    if (error) throw error;
+    return true;
   },
 };

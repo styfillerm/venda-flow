@@ -20,7 +20,7 @@ const nav = [
 
 export function DashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -80,7 +80,7 @@ export function DashboardLayout() {
           </nav>
           <div className="absolute bottom-0 left-0 right-0 border-t p-3">
             <button
-              onClick={() => { logout(); navigate({ to: "/dashboard" }); }}
+              onClick={async () => { await signOut(); navigate({ to: "/auth", replace: true }); }}
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
             >
               <LogOut className="h-4 w-4" /> Sair
