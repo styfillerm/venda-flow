@@ -14,7 +14,221 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          cidade: string
+          created_at: string
+          documento: string
+          email: string
+          endereco: string
+          id: string
+          nome: string
+          observacoes: string
+          telefone: string
+          user_id: string
+        }
+        Insert: {
+          cidade?: string
+          created_at?: string
+          documento?: string
+          email?: string
+          endereco?: string
+          id?: string
+          nome: string
+          observacoes?: string
+          telefone?: string
+          user_id: string
+        }
+        Update: {
+          cidade?: string
+          created_at?: string
+          documento?: string
+          email?: string
+          endereco?: string
+          id?: string
+          nome?: string
+          observacoes?: string
+          telefone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          categoria: string
+          created_at: string
+          data: string
+          descricao: string
+          id: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          categoria?: string
+          created_at?: string
+          data?: string
+          descricao: string
+          id?: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          data?: string
+          descricao?: string
+          id?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          categoria: string
+          codigo: string
+          created_at: string
+          estoque: number
+          estoque_minimo: number
+          fornecedor_id: string | null
+          id: string
+          nome: string
+          status: string
+          user_id: string
+          valor_compra: number
+          valor_venda: number
+        }
+        Insert: {
+          categoria?: string
+          codigo?: string
+          created_at?: string
+          estoque?: number
+          estoque_minimo?: number
+          fornecedor_id?: string | null
+          id?: string
+          nome: string
+          status?: string
+          user_id: string
+          valor_compra?: number
+          valor_venda?: number
+        }
+        Update: {
+          categoria?: string
+          codigo?: string
+          created_at?: string
+          estoque?: number
+          estoque_minimo?: number
+          fornecedor_id?: string | null
+          id?: string
+          nome?: string
+          status?: string
+          user_id?: string
+          valor_compra?: number
+          valor_venda?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          cliente_id: string | null
+          created_at: string
+          data: string
+          desconto: number
+          forma_pagamento: string
+          id: string
+          produto_id: string | null
+          quantidade: number
+          user_id: string
+          valor_total: number
+          valor_unitario: number
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string
+          data?: string
+          desconto?: number
+          forma_pagamento?: string
+          id?: string
+          produto_id?: string | null
+          quantidade?: number
+          user_id: string
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string
+          data?: string
+          desconto?: number
+          forma_pagamento?: string
+          id?: string
+          produto_id?: string | null
+          quantidade?: number
+          user_id?: string
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          cnpj: string
+          created_at: string
+          email: string
+          empresa: string
+          endereco: string
+          id: string
+          responsavel: string
+          telefone: string
+          user_id: string
+        }
+        Insert: {
+          cnpj?: string
+          created_at?: string
+          email?: string
+          empresa: string
+          endereco?: string
+          id?: string
+          responsavel?: string
+          telefone?: string
+          user_id: string
+        }
+        Update: {
+          cnpj?: string
+          created_at?: string
+          email?: string
+          empresa?: string
+          endereco?: string
+          id?: string
+          responsavel?: string
+          telefone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
