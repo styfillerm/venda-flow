@@ -1,11 +1,9 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Session, User as SbUser } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import type { User } from "@/types";
 
 interface AuthCtx {
   user: User | null;
-  session: Session | null;
+  session: null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, nome?: string) => Promise<{ error: Error | null }>;
@@ -14,56 +12,17 @@ interface AuthCtx {
 
 const AuthContext = createContext<AuthCtx | null>(null);
 
-function toUser(u: SbUser | null | undefined): User | null {
-  if (!u) return null;
-  const nome =
-    (u.user_metadata?.nome as string | undefined) ??
-    (u.user_metadata?.full_name as string | undefined) ??
-    (u.email ? u.email.split("@")[0] : "Usuário");
-  return { id: u.id, nome, email: u.email ?? "" };
-}
-
+// Minimal stubbed AuthProvider: provides a default user so UI keeps working
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user] = useState<User | null>({ id: "local", nome: "Usuário", email: "" });
+  const [loading] = useState(false);
 
-  useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setUser(toUser(s?.user));
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(toUser(data.session?.user));
-      setLoading(false);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
-
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error ?? null };
-  };
-
-  const signUp = async (email: string, password: string, nome?: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: nome ? { nome } : undefined,
-      },
-    });
-    return { error: error ?? null };
-  };
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
+  const signIn = async () => ({ error: null as Error | null });
+  const signUp = async () => ({ error: null as Error | null });
+  const signOut = async () => {};
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session: null, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
