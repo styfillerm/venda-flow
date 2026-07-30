@@ -1,18 +1,42 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Boxes, AlertTriangle, XCircle } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Boxes, AlertTriangle, XCircle, Plus } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
 import { DataTable, type Column } from "@/components/common/DataTable";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/context/DataContext";
 import type { Product } from "@/types";
+import { Field } from "./_app.clientes";
 import { brl, num } from "@/lib/format";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/estoque")({
   head: () => ({ meta: [{ title: "Estoque — Sistema de Gestão" }] }),
   component: StockPage,
 });
+
+const schema = z.object({
+  nome: z.string().min(2, "Informe o nome"),
+  codigo: z.string().min(1, "Informe o código"),
+  categoria: z.string().min(1, "Informe a categoria"),
+  fornecedorId: z.string().min(1, "Selecione um fornecedor"),
+  valorCompra: z.coerce.number().min(0),
+  valorVenda: z.coerce.number().min(0),
+  estoque: z.coerce.number().min(0),
+  estoqueMinimo: z.coerce.number().min(0),
+  status: z.enum(["ativo", "inativo"]),
+});
+type Form = z.infer<typeof schema>;
+const defaults: Form = { nome: "", codigo: "", categoria: "", fornecedorId: "", valorCompra: 0, valorVenda: 0, estoque: 0, estoqueMinimo: 0, status: "ativo" };
+
 
 function statusOf(p: Product): { label: string; tone: "ok" | "low" | "out" } {
   if (p.estoque === 0) return { label: "Sem estoque", tone: "out" };
