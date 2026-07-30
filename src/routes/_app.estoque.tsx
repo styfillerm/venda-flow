@@ -96,7 +96,12 @@ function StockPage() {
 
   return (
     <div>
-      <PageHeader title="Estoque" subtitle="Visão consolidada do estoque atual" />
+      <PageHeader
+        title="Estoque"
+        subtitle="Visão consolidada do estoque atual"
+        actions={<Button onClick={openNew} className="rounded-xl"><Plus className="h-4 w-4 mr-1" /> Novo Produto</Button>}
+      />
+
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard title="Total em Estoque" value={num(stats.total)} icon={Boxes} tone="primary" />
