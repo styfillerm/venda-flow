@@ -117,6 +117,55 @@ function StockPage() {
           initialSort={{ key: "estoque", dir: "asc" }}
         />
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Novo Produto</DialogTitle></DialogHeader>
+          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="Nome" error={errors.nome?.message}><Input {...register("nome")} /></Field>
+            <Field label="Código" error={errors.codigo?.message}><Input {...register("codigo")} /></Field>
+            <Field label="Categoria" error={errors.categoria?.message}><Input {...register("categoria")} /></Field>
+            <Field label="Fornecedor" error={errors.fornecedorId?.message}>
+              <Controller
+                control={control}
+                name="fornecedorId"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map((s) => <SelectItem key={s.id} value={s.id}>{s.empresa}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <Field label="Valor de compra"><Input type="number" step="0.01" {...register("valorCompra")} /></Field>
+            <Field label="Valor de venda"><Input type="number" step="0.01" {...register("valorVenda")} /></Field>
+            <Field label="Estoque"><Input type="number" {...register("estoque")} /></Field>
+            <Field label="Estoque mínimo"><Input type="number" {...register("estoqueMinimo")} /></Field>
+            <Field label="Status">
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ativo">Ativo</SelectItem>
+                      <SelectItem value="inativo">Inativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <DialogFooter className="sm:col-span-2">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+              <Button type="submit" disabled={isSubmitting}>Cadastrar</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
