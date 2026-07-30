@@ -45,7 +45,20 @@ function statusOf(p: Product): { label: string; tone: "ok" | "low" | "out" } {
 }
 
 function StockPage() {
-  const { products, suppliers } = useData();
+  const { products, suppliers, addProduct } = useData();
+  const [open, setOpen] = useState(false);
+  const { register, handleSubmit, reset, control, formState: { errors, isSubmitting } } = useForm<Form>({
+    resolver: zodResolver(schema),
+    defaultValues: defaults,
+  });
+
+  const openNew = () => { reset(defaults); setOpen(true); };
+  const onSubmit = async (data: Form) => {
+    await addProduct(data);
+    toast.success("Produto cadastrado");
+    setOpen(false);
+  };
+
 
   const stats = useMemo(() => {
     const total = products.reduce((s, p) => s + p.estoque, 0);
