@@ -16,6 +16,7 @@ import type { PaymentMethod, Sale } from "@/types";
 import { Field, Row } from "./_app.clientes";
 import { brl, dateBR, paymentLabel } from "@/lib/format";
 import { toast } from "sonner";
+import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/vendas")({
   head: () => ({ meta: [{ title: "Vendas — Sistema de Gestão" }] }),
@@ -81,9 +82,10 @@ function SalesPage() {
       formaPagamento: data.formaPagamento as PaymentMethod,
       data: new Date(data.data).toISOString(),
     };
-    if (editing) { await updateSale(editing.id, payload); toast.success("Venda atualizada"); }
-    else { await addSale(payload); toast.success("Venda registrada • Estoque atualizado"); }
-    setOpen(false);
+    const ok = editing
+      ? await runAction(() => updateSale(editing.id, payload), "Venda atualizada")
+      : await runAction(() => addSale(payload), "Venda registrada • Estoque atualizado");
+    if (ok) setOpen(false);
   };
 
   const clientName = (id: string) => clients.find((c) => c.id === id)?.nome ?? "—";

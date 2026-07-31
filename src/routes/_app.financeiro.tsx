@@ -16,6 +16,7 @@ import type { Expense } from "@/types";
 import { Field } from "./_app.clientes";
 import { brl, dateBR, num } from "@/lib/format";
 import { toast } from "sonner";
+import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/financeiro")({
   head: () => ({ meta: [{ title: "Financeiro — Sistema de Gestão" }] }),
@@ -59,9 +60,10 @@ function FinancePage() {
 
   const onSubmit = async (data: Form) => {
     const payload = { ...data, data: new Date(data.data).toISOString() };
-    if (editing) { await updateExpense(editing.id, payload); toast.success("Despesa atualizada"); }
-    else { await addExpense(payload); toast.success("Despesa cadastrada"); }
-    setOpen(false);
+    const ok = editing
+      ? await runAction(() => updateExpense(editing.id, payload), "Despesa atualizada")
+      : await runAction(() => addExpense(payload), "Despesa cadastrada");
+    if (ok) setOpen(false);
   };
 
   const columns: Column<Expense>[] = [

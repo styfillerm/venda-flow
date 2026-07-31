@@ -17,6 +17,7 @@ import type { Product } from "@/types";
 import { Field } from "./_app.clientes";
 import { brl, num } from "@/lib/format";
 import { toast } from "sonner";
+import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/estoque")({
   head: () => ({ meta: [{ title: "Estoque — Sistema de Gestão" }] }),
@@ -54,9 +55,8 @@ function StockPage() {
 
   const openNew = () => { reset(defaults); setOpen(true); };
   const onSubmit = async (data: Form) => {
-    await addProduct(data);
-    toast.success("Produto cadastrado");
-    setOpen(false);
+    const ok = await runAction(() => addProduct(data), "Produto cadastrado");
+    if (ok) setOpen(false);
   };
 
 

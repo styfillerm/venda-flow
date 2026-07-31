@@ -1,51 +1,20 @@
-## Objetivo
+## Diagnóstico (verificado no banco)
 
-Ativar o **Lovable Cloud** (Postgres + Auth) e migrar todo o CRUD do `localStorage` para o banco de dados real, mantendo **todas as tabelas vazias** para o cliente cadastrar manualmente.
+Consultei as permissões do banco: **nenhuma das tabelas (`clients`, `suppliers`, `products`, `sales`, `expenses`) tem permissão de acesso concedida** para as funções `authenticated`/`service_role`. Sem isso, toda inserção volta com erro de permissão, mesmo com as regras de segurança (RLS) corretas. Também confirmei que **não existe nenhum usuário cadastrado** e que todas as tabelas estão com 0 registros.
 
-## Etapas
+Além disso, o formulário de fornecedores chama `addSupplier` sem `try/catch`, então o erro estourou silenciosamente — o botão parece "não fazer nada". Esse mesmo padrão existe nas outras telas de cadastro.
 
-### 1. Ativar Lovable Cloud
-Provisiona banco Postgres, autenticação e storage automaticamente (sem contas externas).
+## Plano
 
-### 2. Criar schema no banco (migração SQL)
-Tabelas em `public`, todas vazias, com RLS + GRANTs corretos:
+1. **Migração no banco**: conceder as permissões de acesso à API de dados para as 5 tabelas (`authenticated`: ler/criar/editar/excluir; `service_role`: total). Não altera nenhuma regra de segurança — cada usuário continua vendo apenas os próprios dados.
+2. **Tratamento de erro nos formulários**: envolver os `onSubmit` de Fornecedores, Clientes, Produtos, Vendas, Financeiro e Estoque em `try/catch`, exibindo `toast.error` com a mensagem retornada pelo banco (inclusive "Não autenticado"), para que nunca mais falhe em silêncio.
+3. **Verificação**: após aplicar, testo o fluxo de cadastro de fornecedor no preview autenticado e confirmo que a linha aparece na tabela do banco.
 
-- `clients` (nome, cpf_cnpj, telefone, email, cidade, endereco, observacoes)
-- `suppliers` (empresa, cnpj, responsavel, telefone, email, endereco)
-- `products` (nome, codigo, categoria, fornecedor_id, valor_compra, valor_venda, estoque, estoque_minimo, status)
-- `sales` (cliente_id, produto_id, quantidade, valor_unitario, desconto, valor_total, forma_pagamento, data)
-- `expenses` (descricao, categoria, valor, data)
+## Observação
 
-Cada tabela terá:
-- `id uuid`, `user_id uuid` (dono), `created_at timestamptz`
-- RLS habilitado com policies `auth.uid() = user_id` (cada usuário vê só seus dados)
-- Trigger para decrementar/incrementar estoque em `sales` automaticamente
-- **Nenhum INSERT** — bases 100% vazias
-
-### 3. Substituir camada de dados
-- Reescrever `src/services/index.ts` para usar o cliente Supabase gerado (`@/integrations/supabase/client`) no lugar do `mock-store`
-- Remover `src/lib/mock-store.ts` e a chamada `seedIfEmpty()` do `DataContext`
-- Manter a mesma interface (`list/create/update/remove`) para não quebrar as páginas
-- Ajustar `DataContext` para recarregar após login
-
-### 4. Autenticação real
-Substituir o auto-login por login real (email + senha + Google), já que o banco exige `auth.uid()` para funcionar com RLS:
-- Tela de login/cadastro simples com o mesmo visual roxo/dourado
-- Redirecionamento para `/dashboard` após login
-- Rota protegida via `_authenticated/` layout
-- Logout no menu do usuário
-
-### 5. Acesso ao banco de dados
-Após concluído, você terá acesso ao painel administrativo do banco pela aba **Cloud** aqui no Lovable:
-- **Cloud → Users** — gerenciar usuários cadastrados
-- **Cloud → Tables** — visualizar/editar registros de todas as tabelas em tempo real
-- **Cloud → Advanced settings → Export data** — baixar dump completo do banco quando quiser
-
-Não existe usuário/senha separado de "banco de dados" pra logar em outra ferramenta — o acesso é feito direto pelo painel do Lovable Cloud, que já está autenticado com sua conta. Assim que a Cloud for ativada, essa aba aparece no topo do projeto.
+Se o cadastro tiver sido tentado sem login (não há usuários criados ainda), é preciso criar a conta em `/auth` primeiro — depois da correção o sistema avisará isso claramente na tela.
 
 ## Detalhes técnicos
 
-- Frontend continua idêntico visualmente (tema PodGYN roxo + dourado, cabeçalho, sidebar)
-- Contexto de dados (`DataContext`) permanece — só troca a fonte
-- Regras de negócio (débito de estoque em venda, KPIs do dashboard) migram para triggers SQL onde fizer sentido, o resto continua no frontend
-- Sem seeds, sem dados fictícios — pronto pro cliente popular
+- SQL: `GRANT SELECT, INSERT, UPDATE, DELETE ON public.<tabela> TO authenticated; GRANT ALL ON public.<tabela> TO service_role;` para cada uma das 5 tabelas. Sem `anon`, pois todas as policies usam `auth.uid()`.
+- Frontend: apenas os handlers de submit/exclusão nas rotas `src/routes/_app.*.tsx`; a camada de serviços já propaga o `error` do Supabase.
