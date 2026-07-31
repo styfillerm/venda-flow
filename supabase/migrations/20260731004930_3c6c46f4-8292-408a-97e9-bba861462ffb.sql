@@ -1,0 +1,10 @@
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.clients TO authenticated;
+GRANT ALL ON public.clients TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.suppliers TO authenticated;
+GRANT ALL ON public.suppliers TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.products TO authenticated;
+GRANT ALL ON public.products TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.sales TO authenticated;
+GRANT ALL ON public.sales TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.expenses TO authenticated;
+GRANT ALL ON public.expenses TO service_role;
