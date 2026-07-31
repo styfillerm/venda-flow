@@ -16,6 +16,7 @@ import type { Expense } from "@/types";
 import { Field } from "./_app.clientes";
 import { brl, dateBR, num } from "@/lib/format";
 import { toast } from "sonner";
+import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/financeiro")({
   head: () => ({ meta: [{ title: "Financeiro — Sistema de Gestão" }] }),

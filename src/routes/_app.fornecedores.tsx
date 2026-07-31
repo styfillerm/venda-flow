@@ -15,6 +15,7 @@ import type { Supplier } from "@/types";
 import { Field, Row } from "./_app.clientes";
 import { dateBR } from "@/lib/format";
 import { toast } from "sonner";
+import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/fornecedores")({
   head: () => ({ meta: [{ title: "Fornecedores — Sistema de Gestão" }] }),

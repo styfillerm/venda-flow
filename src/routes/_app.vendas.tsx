@@ -16,6 +16,7 @@ import type { PaymentMethod, Sale } from "@/types";
 import { Field, Row } from "./_app.clientes";
 import { brl, dateBR, paymentLabel } from "@/lib/format";
 import { toast } from "sonner";
+import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/vendas")({
   head: () => ({ meta: [{ title: "Vendas — Sistema de Gestão" }] }),

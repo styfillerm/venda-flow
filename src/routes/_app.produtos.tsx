@@ -17,6 +17,7 @@ import type { Product } from "@/types";
 import { Field, Row } from "./_app.clientes";
 import { brl } from "@/lib/format";
 import { toast } from "sonner";
+import { runAction } from "@/lib/errors";
 import { Controller } from "react-hook-form";
 
 export const Route = createFileRoute("/_app/produtos")({

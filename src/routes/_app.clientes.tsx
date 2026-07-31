@@ -15,6 +15,7 @@ import { useData } from "@/context/DataContext";
 import type { Client } from "@/types";
 import { dateBR } from "@/lib/format";
 import { toast } from "sonner";
+import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/clientes")({
   head: () => ({ meta: [{ title: "Clientes — Sistema de Gestão" }] }),
