@@ -54,9 +54,8 @@ function StockPage() {
 
   const openNew = () => { reset(defaults); setOpen(true); };
   const onSubmit = async (data: Form) => {
-    await addProduct(data);
-    toast.success("Produto cadastrado");
-    setOpen(false);
+    const ok = await runAction(() => addProduct(data), "Produto cadastrado");
+    if (ok) setOpen(false);
   };
 
 

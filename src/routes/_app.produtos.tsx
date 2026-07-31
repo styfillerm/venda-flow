@@ -55,9 +55,10 @@ function ProductsPage() {
   const openEdit = (p: Product) => { setEditing(p); reset(p); setOpen(true); };
 
   const onSubmit = async (data: Form) => {
-    if (editing) { await updateProduct(editing.id, data); toast.success("Produto atualizado"); }
-    else { await addProduct(data); toast.success("Produto cadastrado"); }
-    setOpen(false);
+    const ok = editing
+      ? await runAction(() => updateProduct(editing.id, data), "Produto atualizado")
+      : await runAction(() => addProduct(data), "Produto cadastrado");
+    if (ok) setOpen(false);
   };
 
   const supplierName = (id: string) => suppliers.find((s) => s.id === id)?.empresa ?? "—";

@@ -59,9 +59,10 @@ function FinancePage() {
 
   const onSubmit = async (data: Form) => {
     const payload = { ...data, data: new Date(data.data).toISOString() };
-    if (editing) { await updateExpense(editing.id, payload); toast.success("Despesa atualizada"); }
-    else { await addExpense(payload); toast.success("Despesa cadastrada"); }
-    setOpen(false);
+    const ok = editing
+      ? await runAction(() => updateExpense(editing.id, payload), "Despesa atualizada")
+      : await runAction(() => addExpense(payload), "Despesa cadastrada");
+    if (ok) setOpen(false);
   };
 
   const columns: Column<Expense>[] = [

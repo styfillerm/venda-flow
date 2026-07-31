@@ -48,9 +48,10 @@ function ClientesPage() {
   const openEdit = (c: Client) => { setEditing(c); reset(c); setOpen(true); };
 
   const onSubmit = async (data: Form) => {
-    if (editing) { await updateClient(editing.id, data); toast.success("Cliente atualizado"); }
-    else { await addClient(data); toast.success("Cliente cadastrado"); }
-    setOpen(false);
+    const ok = editing
+      ? await runAction(() => updateClient(editing.id, data), "Cliente atualizado")
+      : await runAction(() => addClient(data), "Cliente cadastrado");
+    if (ok) setOpen(false);
   };
 
   const columns: Column<Client>[] = [

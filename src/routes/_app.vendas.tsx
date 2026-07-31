@@ -81,9 +81,10 @@ function SalesPage() {
       formaPagamento: data.formaPagamento as PaymentMethod,
       data: new Date(data.data).toISOString(),
     };
-    if (editing) { await updateSale(editing.id, payload); toast.success("Venda atualizada"); }
-    else { await addSale(payload); toast.success("Venda registrada • Estoque atualizado"); }
-    setOpen(false);
+    const ok = editing
+      ? await runAction(() => updateSale(editing.id, payload), "Venda atualizada")
+      : await runAction(() => addSale(payload), "Venda registrada • Estoque atualizado");
+    if (ok) setOpen(false);
   };
 
   const clientName = (id: string) => clients.find((c) => c.id === id)?.nome ?? "—";

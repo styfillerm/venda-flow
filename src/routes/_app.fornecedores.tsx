@@ -47,9 +47,10 @@ function SuppliersPage() {
   const openEdit = (s: Supplier) => { setEditing(s); reset(s); setOpen(true); };
 
   const onSubmit = async (data: Form) => {
-    if (editing) { await updateSupplier(editing.id, data); toast.success("Fornecedor atualizado"); }
-    else { await addSupplier(data); toast.success("Fornecedor cadastrado"); }
-    setOpen(false);
+    const ok = editing
+      ? await runAction(() => updateSupplier(editing.id, data), "Fornecedor atualizado")
+      : await runAction(() => addSupplier(data), "Fornecedor cadastrado");
+    if (ok) setOpen(false);
   };
 
   const columns: Column<Supplier>[] = [
