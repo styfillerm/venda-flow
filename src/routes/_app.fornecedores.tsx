@@ -14,7 +14,6 @@ import { useData } from "@/context/DataContext";
 import type { Supplier } from "@/types";
 import { Field, Row } from "./_app.clientes";
 import { dateBR } from "@/lib/format";
-import { toast } from "sonner";
 import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/fornecedores")({
@@ -124,7 +123,7 @@ function SuppliersPage() {
         onOpenChange={(v) => !v && setToDelete(null)}
         title="Excluir fornecedor?"
         description={`O fornecedor "${toDelete?.empresa ?? ""}" será removido.`}
-        onConfirm={async () => { if (toDelete) { await removeSupplier(toDelete.id); toast.success("Fornecedor removido"); setToDelete(null); } }}
+        onConfirm={async () => { if (toDelete && await runAction(() => removeSupplier(toDelete.id), "Fornecedor removido")) setToDelete(null); }}
       />
     </div>
   );

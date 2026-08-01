@@ -16,7 +16,6 @@ import { useData } from "@/context/DataContext";
 import type { Product } from "@/types";
 import { Field } from "./_app.clientes";
 import { brl, num } from "@/lib/format";
-import { toast } from "sonner";
 import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/estoque")({

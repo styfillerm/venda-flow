@@ -14,7 +14,6 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { useData } from "@/context/DataContext";
 import type { Client } from "@/types";
 import { dateBR } from "@/lib/format";
-import { toast } from "sonner";
 import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/clientes")({
@@ -134,7 +133,7 @@ function ClientesPage() {
         onOpenChange={(v) => !v && setToDelete(null)}
         title="Excluir cliente?"
         description={`O cliente "${toDelete?.nome ?? ""}" será removido.`}
-        onConfirm={async () => { if (toDelete) { await removeClient(toDelete.id); toast.success("Cliente removido"); setToDelete(null); } }}
+        onConfirm={async () => { if (toDelete && await runAction(() => removeClient(toDelete.id), "Cliente removido")) setToDelete(null); }}
       />
     </div>
   );
