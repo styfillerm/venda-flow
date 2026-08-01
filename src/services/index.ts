@@ -3,7 +3,7 @@
  * Each service maps snake_case columns to camelCase types.
  */
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import type { Tables, TablesUpdate } from "@/integrations/supabase/types";
 import type { Client, Expense, PaymentMethod, Product, Sale, Supplier } from "@/types";
 
 async function currentUserId(): Promise<string> {
