@@ -199,7 +199,7 @@ function SalesPage() {
         onOpenChange={(v) => !v && setToDelete(null)}
         title="Excluir venda?"
         description="A venda será removida e o estoque será restaurado."
-        onConfirm={async () => { if (toDelete) { await removeSale(toDelete.id); toast.success("Venda removida"); setToDelete(null); } }}
+        onConfirm={async () => { if (toDelete && await runAction(() => removeSale(toDelete.id), "Venda removida")) setToDelete(null); }}
       />
     </div>
   );

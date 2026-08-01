@@ -15,7 +15,6 @@ import { useData } from "@/context/DataContext";
 import type { Expense } from "@/types";
 import { Field } from "./_app.clientes";
 import { brl, dateBR, num } from "@/lib/format";
-import { toast } from "sonner";
 import { runAction } from "@/lib/errors";
 
 export const Route = createFileRoute("/_app/financeiro")({
@@ -124,7 +123,7 @@ function FinancePage() {
         open={!!toDelete}
         onOpenChange={(v) => !v && setToDelete(null)}
         title="Excluir despesa?"
-        onConfirm={async () => { if (toDelete) { await removeExpense(toDelete.id); toast.success("Despesa removida"); setToDelete(null); } }}
+        onConfirm={async () => { if (toDelete && await runAction(() => removeExpense(toDelete.id), "Despesa removida")) setToDelete(null); }}
       />
     </div>
   );

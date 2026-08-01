@@ -128,13 +128,34 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "products_fornecedor_id_fkey"
-            columns: ["fornecedor_id"]
+            foreignKeyName: "products_fornecedor_owner_fkey"
+            columns: ["fornecedor_id", "user_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "user_id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          nome?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       sales: {
         Row: {
@@ -178,18 +199,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "sales_cliente_id_fkey"
-            columns: ["cliente_id"]
+            foreignKeyName: "sales_cliente_owner_fkey"
+            columns: ["cliente_id", "user_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "user_id"]
           },
           {
-            foreignKeyName: "sales_produto_id_fkey"
-            columns: ["produto_id"]
+            foreignKeyName: "sales_produto_owner_fkey"
+            columns: ["produto_id", "user_id"]
             isOneToOne: false
             referencedRelation: "products"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "user_id"]
           },
         ]
       }

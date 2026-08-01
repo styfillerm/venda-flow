@@ -3,6 +3,7 @@
  * Each service maps snake_case columns to camelCase types.
  */
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables, TablesUpdate } from "@/integrations/supabase/types";
 import type { Client, Expense, PaymentMethod, Product, Sale, Supplier } from "@/types";
 
 async function currentUserId(): Promise<string> {
@@ -12,11 +13,7 @@ async function currentUserId(): Promise<string> {
 }
 
 // ============ CLIENTS ============
-type ClientRow = {
-  id: string; nome: string; documento: string; telefone: string;
-  email: string; cidade: string; endereco: string; observacoes: string;
-  created_at: string;
-};
+type ClientRow = Tables<"clients">;
 const toClient = (r: ClientRow): Client => ({
   id: r.id, nome: r.nome, documento: r.documento, telefone: r.telefone,
   email: r.email, cidade: r.cidade, endereco: r.endereco,
@@ -39,25 +36,24 @@ export const clientsService = {
     return toClient(data);
   },
   update: async (id: string, d: Partial<Client>): Promise<Client> => {
+    const userId = await currentUserId();
     const { data, error } = await supabase.from("clients").update({
       nome: d.nome, documento: d.documento, telefone: d.telefone,
       email: d.email, cidade: d.cidade, endereco: d.endereco, observacoes: d.observacoes,
-    }).eq("id", id).select().single();
+    }).eq("id", id).eq("user_id", userId).select().single();
     if (error) throw error;
     return toClient(data);
   },
   remove: async (id: string) => {
-    const { error } = await supabase.from("clients").delete().eq("id", id);
+    const userId = await currentUserId();
+    const { error } = await supabase.from("clients").delete().eq("id", id).eq("user_id", userId);
     if (error) throw error;
     return true;
   },
 };
 
 // ============ SUPPLIERS ============
-type SupplierRow = {
-  id: string; empresa: string; cnpj: string; responsavel: string;
-  telefone: string; email: string; endereco: string; created_at: string;
-};
+type SupplierRow = Tables<"suppliers">;
 const toSupplier = (r: SupplierRow): Supplier => ({
   id: r.id, empresa: r.empresa, cnpj: r.cnpj, responsavel: r.responsavel,
   telefone: r.telefone, email: r.email, endereco: r.endereco, createdAt: r.created_at,
@@ -79,26 +75,24 @@ export const suppliersService = {
     return toSupplier(data);
   },
   update: async (id: string, d: Partial<Supplier>): Promise<Supplier> => {
+    const userId = await currentUserId();
     const { data, error } = await supabase.from("suppliers").update({
       empresa: d.empresa, cnpj: d.cnpj, responsavel: d.responsavel,
       telefone: d.telefone, email: d.email, endereco: d.endereco,
-    }).eq("id", id).select().single();
+    }).eq("id", id).eq("user_id", userId).select().single();
     if (error) throw error;
     return toSupplier(data);
   },
   remove: async (id: string) => {
-    const { error } = await supabase.from("suppliers").delete().eq("id", id);
+    const userId = await currentUserId();
+    const { error } = await supabase.from("suppliers").delete().eq("id", id).eq("user_id", userId);
     if (error) throw error;
     return true;
   },
 };
 
 // ============ PRODUCTS ============
-type ProductRow = {
-  id: string; nome: string; codigo: string; categoria: string;
-  fornecedor_id: string | null; valor_compra: number; valor_venda: number;
-  estoque: number; estoque_minimo: number; status: string; created_at: string;
-};
+type ProductRow = Tables<"products">;
 const toProduct = (r: ProductRow): Product => ({
   id: r.id, nome: r.nome, codigo: r.codigo, categoria: r.categoria,
   fornecedorId: r.fornecedor_id ?? "", valorCompra: Number(r.valor_compra),
@@ -125,7 +119,8 @@ export const productsService = {
     return toProduct(data);
   },
   update: async (id: string, d: Partial<Product>): Promise<Product> => {
-    const payload: Record<string, any> = {};
+    const userId = await currentUserId();
+    const payload: TablesUpdate<"products"> = {};
     if (d.nome !== undefined) payload.nome = d.nome;
     if (d.codigo !== undefined) payload.codigo = d.codigo;
     if (d.categoria !== undefined) payload.categoria = d.categoria;
@@ -135,23 +130,20 @@ export const productsService = {
     if (d.estoque !== undefined) payload.estoque = d.estoque;
     if (d.estoqueMinimo !== undefined) payload.estoque_minimo = d.estoqueMinimo;
     if (d.status !== undefined) payload.status = d.status;
-    const { data, error } = await supabase.from("products").update(payload as never).eq("id", id).select().single();
+    const { data, error } = await supabase.from("products").update(payload).eq("id", id).eq("user_id", userId).select().single();
     if (error) throw error;
     return toProduct(data);
   },
   remove: async (id: string) => {
-    const { error } = await supabase.from("products").delete().eq("id", id);
+    const userId = await currentUserId();
+    const { error } = await supabase.from("products").delete().eq("id", id).eq("user_id", userId);
     if (error) throw error;
     return true;
   },
 };
 
 // ============ SALES ============
-type SaleRow = {
-  id: string; cliente_id: string | null; produto_id: string | null;
-  quantidade: number; valor_unitario: number; desconto: number;
-  valor_total: number; forma_pagamento: string; data: string; created_at: string;
-};
+type SaleRow = Tables<"sales">;
 const toSale = (r: SaleRow): Sale => ({
   id: r.id, clienteId: r.cliente_id ?? "", produtoId: r.produto_id ?? "",
   quantidade: r.quantidade, valorUnitario: Number(r.valor_unitario),
@@ -178,7 +170,8 @@ export const salesService = {
     return toSale(data);
   },
   update: async (id: string, d: Partial<Sale>): Promise<Sale> => {
-    const payload: Record<string, any> = {};
+    const userId = await currentUserId();
+    const payload: TablesUpdate<"sales"> = {};
     if (d.clienteId !== undefined) payload.cliente_id = d.clienteId || null;
     if (d.produtoId !== undefined) payload.produto_id = d.produtoId || null;
     if (d.quantidade !== undefined) payload.quantidade = d.quantidade;
@@ -187,22 +180,20 @@ export const salesService = {
     if (d.valorTotal !== undefined) payload.valor_total = d.valorTotal;
     if (d.formaPagamento !== undefined) payload.forma_pagamento = d.formaPagamento;
     if (d.data !== undefined) payload.data = d.data;
-    const { data, error } = await supabase.from("sales").update(payload as never).eq("id", id).select().single();
+    const { data, error } = await supabase.from("sales").update(payload).eq("id", id).eq("user_id", userId).select().single();
     if (error) throw error;
     return toSale(data);
   },
   remove: async (id: string) => {
-    const { error } = await supabase.from("sales").delete().eq("id", id);
+    const userId = await currentUserId();
+    const { error } = await supabase.from("sales").delete().eq("id", id).eq("user_id", userId);
     if (error) throw error;
     return true;
   },
 };
 
 // ============ EXPENSES ============
-type ExpenseRow = {
-  id: string; descricao: string; categoria: string;
-  valor: number; data: string; created_at: string;
-};
+type ExpenseRow = Tables<"expenses">;
 const toExpense = (r: ExpenseRow): Expense => ({
   id: r.id, descricao: r.descricao, categoria: r.categoria,
   valor: Number(r.valor), data: r.data, createdAt: r.created_at,
@@ -224,17 +215,19 @@ export const expensesService = {
     return toExpense(data);
   },
   update: async (id: string, d: Partial<Expense>): Promise<Expense> => {
-    const payload: Record<string, any> = {};
+    const userId = await currentUserId();
+    const payload: TablesUpdate<"expenses"> = {};
     if (d.descricao !== undefined) payload.descricao = d.descricao;
     if (d.categoria !== undefined) payload.categoria = d.categoria;
     if (d.valor !== undefined) payload.valor = d.valor;
     if (d.data !== undefined) payload.data = d.data;
-    const { data, error } = await supabase.from("expenses").update(payload as never).eq("id", id).select().single();
+    const { data, error } = await supabase.from("expenses").update(payload).eq("id", id).eq("user_id", userId).select().single();
     if (error) throw error;
     return toExpense(data);
   },
   remove: async (id: string) => {
-    const { error } = await supabase.from("expenses").delete().eq("id", id);
+    const userId = await currentUserId();
+    const { error } = await supabase.from("expenses").delete().eq("id", id).eq("user_id", userId);
     if (error) throw error;
     return true;
   },

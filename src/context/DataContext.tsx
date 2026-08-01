@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { clientsService, expensesService, productsService, salesService, suppliersService } from "@/services";
 import { useAuth } from "@/context/AuthContext";
 import type { Client, Expense, Product, Sale, Supplier } from "@/types";
+import { errorMessage } from "@/lib/errors";
+import { toast } from "sonner";
 
 interface DataCtx {
   clients: Client[];
@@ -49,18 +51,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setClients([]); setSuppliers([]); setProducts([]); setSales([]); setExpenses([]);
       return;
     }
-    const [c, s, p, sa, e] = await Promise.all([
-      clientsService.list(),
-      suppliersService.list(),
-      productsService.list(),
-      salesService.list(),
-      expensesService.list(),
-    ]);
-    setClients(c);
-    setSuppliers(s);
-    setProducts(p);
-    setSales(sa);
-    setExpenses(e);
+    try {
+      const [c, s, p, sa, e] = await Promise.all([
+        clientsService.list(), suppliersService.list(), productsService.list(),
+        salesService.list(), expensesService.list(),
+      ]);
+      setClients(c); setSuppliers(s); setProducts(p); setSales(sa); setExpenses(e);
+    } catch (error) {
+      console.error(error);
+      toast.error(errorMessage(error));
+      throw error;
+    }
   }, [user]);
 
   useEffect(() => {
