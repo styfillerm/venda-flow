@@ -88,9 +88,10 @@ function AuthPage() {
         <CardContent>
           <form className="space-y-4" onSubmit={submit}>
             <div className="space-y-2">
-              <Label htmlFor="email">Usuário</Label>
-              <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="username" />
+              <Label htmlFor="usuario">Usuário</Label>
+              <Input id="usuario" value={usuario} onChange={(event) => setUsuario(event.target.value)} autoComplete="username" />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
               <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
