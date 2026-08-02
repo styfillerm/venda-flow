@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
-import { lovable } from "@/integrations/lovable";
+
 import { errorMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/auth")({
@@ -29,10 +29,8 @@ const credentialsSchema = z.object({
 });
 
 function AuthPage() {
-  const { user, loading, signIn, signUp } = useAuth();
+  const { user, loading, signIn } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "signup">("login");
-  const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -50,72 +48,41 @@ function AuthPage() {
       setMessage(parsed.error.issues[0]?.message ?? "Verifique os dados informados");
       return;
     }
-    if (mode === "signup" && nome.trim().length < 2) {
-      setMessage("Informe seu nome");
-      return;
-    }
 
     setSubmitting(true);
     try {
-      const result = mode === "login"
-        ? await signIn(parsed.data.email, parsed.data.password)
-        : await signUp(parsed.data.email, parsed.data.password, nome);
-      if (result.error) {
-        setMessage(errorMessage(result.error));
-        return;
-      }
-      if (mode === "signup") setMessage("Conta criada. Confirme seu email para entrar.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const googleSignIn = async () => {
-    setMessage("");
-    setSubmitting(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      const result = await signIn(parsed.data.email, parsed.data.password);
       if (result.error) setMessage(errorMessage(result.error));
-      if (!result.redirected && !result.error) await navigate({ to: "/dashboard", replace: true });
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+    <main
+      className="flex min-h-screen items-center justify-center p-4"
+      style={{ background: "linear-gradient(160deg, var(--purple) 0%, var(--gold) 100%)" }}
+    >
+      <Card className="w-full max-w-md bg-card">
         <CardHeader>
           <CardTitle className="text-2xl">PodGYN</CardTitle>
-          <CardDescription>{mode === "login" ? "Entre para acessar o painel" : "Crie seu acesso ao sistema"}</CardDescription>
+          <CardDescription>Entre para acessar o painel</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <form className="space-y-4" onSubmit={submit}>
-            {mode === "signup" && (
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome</Label>
-                <Input id="nome" value={nome} onChange={(event) => setNome(event.target.value)} autoComplete="name" />
-              </div>
-            )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" />
+              <Label htmlFor="email">Usuário</Label>
+              <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="username" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
-              <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "login" ? "current-password" : "new-password"} />
+              <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
             </div>
             {message && <p className="text-sm text-destructive" role="alert">{message}</p>}
             <Button className="w-full" type="submit" disabled={submitting || loading}>
-              {mode === "login" ? "Entrar" : "Criar conta"}
+              Entrar
             </Button>
           </form>
-          <Button className="w-full" type="button" variant="outline" onClick={googleSignIn} disabled={submitting || loading}>
-            Continuar com Google
-          </Button>
-          <Button className="w-full" type="button" variant="ghost" onClick={() => { setMode(mode === "login" ? "signup" : "login"); setMessage(""); }}>
-            {mode === "login" ? "Criar uma conta" : "Já tenho uma conta"}
-          </Button>
         </CardContent>
       </Card>
     </main>
