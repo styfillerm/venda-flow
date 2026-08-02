@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
-import { lovable } from "@/integrations/lovable";
+
 import { errorMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/auth")({
