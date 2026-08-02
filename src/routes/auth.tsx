@@ -24,14 +24,18 @@ export const Route = createFileRoute("/auth")({
 });
 
 const credentialsSchema = z.object({
-  email: z.string().email("Informe um email válido"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  usuario: z.string().min(1, "Informe o usuário"),
+  password: z.string().min(1, "Informe a senha"),
 });
 
+const USUARIO = "podgyn";
+const SENHA = "@@PodGYN@2026";
+const EMAIL = "podgyn@podgyn.app";
+
 function AuthPage() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
@@ -43,20 +47,33 @@ function AuthPage() {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setMessage("");
-    const parsed = credentialsSchema.safeParse({ email, password });
+    const parsed = credentialsSchema.safeParse({ usuario, password });
     if (!parsed.success) {
       setMessage(parsed.error.issues[0]?.message ?? "Verifique os dados informados");
+      return;
+    }
+    if (parsed.data.usuario.trim().toLowerCase() !== USUARIO || parsed.data.password !== SENHA) {
+      setMessage("Usuário ou senha inválidos.");
       return;
     }
 
     setSubmitting(true);
     try {
-      const result = await signIn(parsed.data.email, parsed.data.password);
-      if (result.error) setMessage(errorMessage(result.error));
+      const result = await signIn(EMAIL, SENHA);
+      if (result.error) {
+        const created = await signUp(EMAIL, SENHA, "PodGYN");
+        if (created.error) {
+          setMessage(errorMessage(created.error));
+          return;
+        }
+        const retry = await signIn(EMAIL, SENHA);
+        if (retry.error) setMessage(errorMessage(retry.error));
+      }
     } finally {
       setSubmitting(false);
     }
   };
+
 
   return (
     <main
